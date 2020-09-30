@@ -84,14 +84,53 @@ transit_data =
 
 transit_df =  
   janitor::clean_names(transit_data) %>%
-  select("line", "station_name", "station_latitude", "station_longitude", "route1", "route2", "route3", "route4", "route4", "route5", "route6", "route7", "route8", "route9", "route10", "route11", "entrance_type", "entry", "vending", "ada")
+  select("line", "station_name", "station_latitude", "station_longitude", "route1", "route2", "route3", "route4", "route4", "route5", "route6", "route7", "route8", "route9", "route10", "route11", "entrance_type", "entry", "vending", "ada") %>% 
+  mutate(entry = recode(entry,"YES" = TRUE, "NO" = FALSE ))
 
-tansit_df = recode(pull(transit_df, entry), "YES" = TRUE, "NO" = FALSE)
 ```
 
 The dataset contains `r nrow(transit_data)` observations and `r ncol(transit_data)` variables. The variables are `r names(transit_data)`.
 So far, I have done some clean work. First, I change the variable names to lowercase. Then I choose the columns that we need. Lastly, I convert the entry variable from character to a logical variable. The dimension of the resulting dataset is `r nrow(transit_df)` * `r ncol(transit_df)`. These data are not tidy enough.
 
+```{r}
+distinct_stat = distinct(transit_df, line, station_name)
+
+length(which(pull(transit_df, ada) == TRUE))
+
+no_vending_df = filter(transit_df, vending == "NO")
+nrow(no_vending_df)
+length(which(pull(no_vending_df,entry) == TRUE))
+prop = length(which(pull(no_vending_df,entry) == TRUE)) / nrow(no_vending_df)
 
 
+```
+
+There are `r nrow(distinct_stat)` distinct stations. `r length(which(pull(transit_df, ada) == TRUE))` stations are ADA compliant.
+The proportion of station entrances / exits without vending allow entrance is `r prop`.
+
+
+Reformat data
+
+```{r}
+transit_df = 
+  transit_df %>% 
+  mutate_at(vars(route8:route11), as.character)
+
+transit_tidy_data = 
+  pivot_longer(
+    transit_df,
+    route1:route11,
+    names_to = "route_number",
+    names_prefix = "route",
+    values_to = "route_name"
+  )
+
+distinc_tidy_df = distinct(transit_tidy_data, line, station_name, .keep_all = TRUE)
+
+route_serve_A = filter(distinc_tidy_df, route_name == "A")
+nrow(route_serve_A)
+length(which(pull(route_serve_A, ada) == TRUE))
+```
+
+There are `r nrow(route_serve_A)` distinct stations serve the A train. Among these stations, there are `r length(which(pull(route_serve_A, ada) == TRUE))` are ADA compliant.
 
