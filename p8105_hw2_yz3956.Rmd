@@ -149,3 +149,19 @@ pols_month_df =
     president = ifelse(prez_gop == 1, "gop", "dem")
   ) %>% 
   select(-day, -prez_gop, -prez_dem)
+```
+
+
+Read the snp data.
+
+```{r}
+snp_df = 
+  read_csv("./data_hw2/snp.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(
+    month = recode(month, `1` = "January", `2` = "Feburary", `3` = "March", `4` = "April", `5` = "May", `6` = "June", `7` = "July", `8` = "August", `9` = "September", `10` = "October", `11` = "November", `12` = "December")) %>% 
+  select(-day) %>% 
+  relocate(year, month)
+
+```
