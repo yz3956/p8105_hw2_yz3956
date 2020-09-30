@@ -89,7 +89,7 @@ transit_df =
 
 ```
 
-The dataset contains `r nrow(transit_data)` observations and `r ncol(transit_data)` variables. The variables are `r names(transit_data)`.
+The transit dataset contains `r nrow(transit_data)` observations and `r ncol(transit_data)` variables. The variables are `r names(transit_data)`.
 So far, I have done some clean work. First, I change the variable names to lowercase. Then I choose the columns that we need. Lastly, I convert the entry variable from character to a logical variable. The dimension of the resulting dataset is `r nrow(transit_df)` * `r ncol(transit_df)`. These data are not tidy enough.
 
 ```{r}
@@ -184,3 +184,13 @@ unemploy_df =
 
 ```
 
+Merge three datasets.
+
+```{r}
+total_df = 
+  left_join(pols_month_df, snp_df, by = c("year", "month")) %>% 
+  left_join(unemploy_df, by = c("year", "month")) %>% 
+  mutate(year = as.numeric(year))
+```
+
+The pols-month dataset contains information about date, president, governor, senator and representative. The snp dataset contains information about data and close. The unemployment dataset contains information about year, month and employment. The resulting dataset has `r nrow(total_df)` rows and `r ncol(total_df)` columns. The range of years is `r range(pull(total_df, year))`. The variables are `r names(total_df)`.
